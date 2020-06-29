@@ -68,4 +68,5 @@ def plot_ratios():
 
 
 if __name__ == '__main__':
+    width_height_extraction()
     plot_ratios()
