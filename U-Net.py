@@ -90,30 +90,22 @@ class UNet(nn.Module):
         temp3 = self.down3(self.pool2(temp2))
         temp4 = self.down4(self.pool3(temp3))
         img = self.upconv1(self.plain(self.pool4(temp4)))
-        deltaY = temp4.shape[2] - img.shape[2]
-        deltaX = temp4.shape[3] - img.shape[3]
-        img = nn.functional.pad(img, [deltaX//2, deltaX - deltaX//2,
-                                      deltaY//2, deltaY - deltaY//2])
-        img = torch.cat((temp4, img), dim=1)
+        img = self.pad_concat(temp4, img)
         img = self.upconv2(self.up1(img))
-        deltaY = temp3.shape[2] - img.shape[2]
-        deltaX = temp3.shape[3] - img.shape[3]
-        img = nn.functional.pad(img, [deltaX // 2, deltaX - deltaX // 2,
-                                      deltaY // 2, deltaY - deltaY // 2])
-        img = torch.cat((temp3, img), dim=1)
+        img = self.pad_concat(temp3, img)
         img = self.upconv3(self.up2(img))
-        deltaY = temp2.shape[2] - img.shape[2]
-        deltaX = temp2.shape[3] - img.shape[3]
-        img = nn.functional.pad(img, [deltaX // 2, deltaX - deltaX // 2,
-                                      deltaY // 2, deltaY - deltaY // 2])
-        img = torch.cat((temp2, img), dim=1)
+        img = self.pad_concat(temp2, img)
         img = self.upconv4(self.up3(img))
-        deltaY = temp1.shape[2] - img.shape[2]
-        deltaX = temp1.shape[3] - img.shape[3]
+        img = self.pad_concat(temp1, img)
+        img = self.up4(img)
+        return img
+
+    def pad_concat(self, temp, img):
+        deltaY = temp.shape[2] - img.shape[2]
+        deltaX = temp.shape[3] - img.shape[3]
         img = nn.functional.pad(img, [deltaX // 2, deltaX - deltaX // 2,
                                       deltaY // 2, deltaY - deltaY // 2])
-        img = torch.cat((temp1, img), dim=1)
-        img = self.up4(img)
+        img = torch.cat((temp, img), dim=1)
         return img
 
 u = UNet()
