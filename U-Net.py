@@ -3,23 +3,33 @@ import torchvision
 from torch import nn
 
 
+# input_size = 572
+# size1 = input_size - 2 - 2
+# size2 = size1 // 2 - 2 - 2
+# size3 = size2 // 2 - 2 - 2
+# size4 = size3 // 2 - 2 - 2
+# size5 = size4 // 2 - 2 - 2
+# size6 = size5 * 2
+# size7 = (size6 - 2 - 2) * 2
+# size8 = (size7 - 2 - 2) * 2
+# size9 = (size8 - 2 - 2) * 2
+# size10 = size9 - 2 - 2
+
+
+
 class UNet(nn.Module):
+    """
+    U-Net 结构实现 照着论文搭积木 论文地址：https://arxiv.org/pdf/1505.04597.pdf
+
+    一些函数和变量的名称参考图片 ‘./U-Net.png’
+
+    部分内容参考这个博客：https://cuijiahua.com/blog/2019/12/dl-15.html
+    """
     def __init__(self):
         super(UNet, self).__init__()
         in_channels = 1
         out_channels = 2
         basic_channels = 64
-        input_size = 572
-        size1 = input_size - 2 - 2
-        size2 = size1 // 2 - 2 - 2
-        size3 = size2 // 2 - 2 - 2
-        size4 = size3 // 2 - 2 - 2
-        size5 = size4 // 2 - 2 - 2
-        size6 = size5 * 2
-        size7 = (size6 - 2 - 2) * 2
-        size8 = (size7 - 2 - 2) * 2
-        size9 = (size8 - 2 - 2) * 2
-        size10 = size9 - 2 - 2
         self.down1 = nn.Sequential(
             nn.Conv2d(in_channels, basic_channels, 3),
             nn.ReLU(),
@@ -101,6 +111,14 @@ class UNet(nn.Module):
         return img
 
     def pad_concat(self, temp, img):
+        """
+        论文中虽然写的是crop，但是用pad会更加方便，而且保留更多信息。
+
+        ‘官方的写法，用的pad，所以我这里也用pad了。
+        其实这个不用太纠结，unet的思想主要在于这种U型的经典结构。
+        至于pad或者crop其实，可以根据需求进行调整的。’   --引用自Jack Cui（上文中博客的博主）
+
+        """
         deltaY = temp.shape[2] - img.shape[2]
         deltaX = temp.shape[3] - img.shape[3]
         img = nn.functional.pad(img, [deltaX // 2, deltaX - deltaX // 2,
@@ -108,8 +126,8 @@ class UNet(nn.Module):
         img = torch.cat((temp, img), dim=1)
         return img
 
-u = UNet()
-a = torch.rand((1, 1, 572, 572))
-a = u(a)
-print(a.shape)
-
+if __name__ == '__main__':
+    u = UNet()
+    a = torch.rand((1, 1, 600, 600))
+    a = u(a)
+    print(a.shape)
