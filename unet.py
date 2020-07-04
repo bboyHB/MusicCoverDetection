@@ -28,7 +28,7 @@ class UNet(nn.Module):
     def __init__(self):
         super(UNet, self).__init__()
         in_channels = 1
-        out_channels = 2
+        out_channels = 1
         basic_channels = 64
         self.down1 = nn.Sequential(
             nn.Conv2d(in_channels, basic_channels, 3),
@@ -95,6 +95,8 @@ class UNet(nn.Module):
         )
 
     def forward(self, img):
+        img = nn.functional.pad(img, [4, 4,
+                                      4, 4])
         temp1 = self.down1(img)
         temp2 = self.down2(self.pool1(temp1))
         temp3 = self.down3(self.pool2(temp2))
@@ -128,6 +130,6 @@ class UNet(nn.Module):
 
 if __name__ == '__main__':
     u = UNet()
-    a = torch.rand((1, 1, 600, 600))
+    a = torch.rand((1, 3, 600, 600))
     a = u(a)
     print(a.shape)

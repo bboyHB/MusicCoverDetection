@@ -8,6 +8,9 @@ import os
 from dataset import TextSegDataset
 from sklearn.model_selection import train_test_split
 
+"""
+Loss汇总： https://blog.csdn.net/sinat_17456165/article/details/107054299?%3E
+"""
 
 model_name = 'unet'
 origin_data_path = 'origindata'
@@ -41,8 +44,8 @@ if not os.path.exists(data_dir):
 
 image_datasets = {x: TextSegDataset(os.path.join(data_dir, x))
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
-                                              shuffle=True, num_workers=2)
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
+                                              shuffle=True, num_workers=0)
                for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 
@@ -119,22 +122,18 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
 def train():
     model = UNet()
-    # num_ftrs = model_ft.classifier.in_features
-    # model_ft.classifier = nn.Linear(num_ftrs, len(face_expressions))
-    # num_ftrs = model_ft.fc.in_features
-    # # nn.Linear(num_ftrs, len(class_names)).
-    # model_ft.fc = nn.Linear(num_ftrs, len(face_expressions))
-
-    model_ft = model.to(device)
-
+    model = model.to(device)
     criterion = nn.BCELoss()
 
     # Observe that all parameters are being optimized
-    optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.02, momentum=0.9)
+    optimizer_ft = optim.SGD(model.parameters(), lr=0.02, momentum=0.9)
 
     # Decay LR by a factor of 0.1 every 7 epochs
-    exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer_ft, step_size=60, gamma=0.1)
+    exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer_ft, step_size=8, gamma=0.1)
 
-    model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                           num_epochs=100)
-    torch.save(model_ft, 'model_{}.pth'.format(model_name))
+    model = train_model(model, criterion, optimizer_ft, exp_lr_scheduler,
+                           num_epochs=10)
+    torch.save(model, 'model_{}.pth'.format(model_name))
+
+if __name__ == '__main__':
+    train()
