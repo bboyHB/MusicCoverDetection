@@ -2,7 +2,7 @@ from PIL import Image
 import os
 from matplotlib import pyplot as plt
 
-original_data_path = '../coverdata'
+original_data_path = '../totaltext-c/train/image'
 weight_hight_file_path = '../w_h.txt'
 
 def width_height_extraction():
@@ -68,5 +68,5 @@ def plot_ratios():
 
 
 if __name__ == '__main__':
-    width_height_extraction()
+    # width_height_extraction()
     plot_ratios()
