@@ -1,10 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 import random
 import numpy
-import webcolors
-from scipy import misc
-import matplotlib.pyplot as plt
-import cv2
 import os
 
 
@@ -26,7 +22,8 @@ def gen_data(raw_pic_color,
              text_size,
              text_font,
              angel,
-             file_name):
+             file_name,
+             gen_path):
     left, right, up, bottom = lrub
     img = Image.new("RGB", (10000, 10000), raw_pic_color)
     font = ImageFont.truetype(os.path.join("fonts/", text_font), text_size)
@@ -37,7 +34,7 @@ def gen_data(raw_pic_color,
     img = img.rotate(angel)
     box = (width - left, height - up, width + right, height + bottom)
     img = img.crop(box)
-    img.save("image/" + file_name)
+    img.save(os.path.join(gen_path, "image/", file_name))
     img = numpy.array(img)
     binary = numpy.zeros((up + bottom, right + left), numpy.uint8)
     for i in range(up + bottom):
@@ -47,7 +44,7 @@ def gen_data(raw_pic_color,
             else:
                 binary[i, j] = 255
     binary = Image.fromarray(binary, mode='L')
-    binary.save("mask/" + file_name)
+    binary.save(os.path.join(gen_path, "mask/", file_name))
 
 
 def random_RGB_color():
@@ -57,7 +54,7 @@ def random_RGB_color():
 
 
 def random_sentence(size=10):
-    alphabet = 'abcdefghijklmnopqrstuvwxyz' + 'abcdefghijklmnopqrstuvwxyz'.upper() + ',./;[]{}:<>?!@#$%^&*()-=_+~`'
+    alphabet = 'abcdefghijklmnopqrstuvwxyz' + 'abcdefghijklmnopqrstuvwxyz'.upper() + ',.;:'
     sentence = ''
     for i in range(random.randint(1, size)):
         sentence += random.choice(alphabet)
@@ -71,14 +68,23 @@ def random_fonts():
 
 
 def random_lrud():
-    return (random.randint(0, 500),
-            random.randint(0, 500),
-            random.randint(0, 500),
-            random.randint(0, 500))
+    return (random.randint(10, 500),
+            random.randint(10, 500),
+            random.randint(10, 500),
+            random.randint(10, 500))
 
 
 if __name__ == '__main__':
-    for i in range(100):
+    data_dir = '../sythdata'
+    image_dir = os.path.join(data_dir, 'image')
+    mask_dir = os.path.join(data_dir, 'mask')
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir)
+    if not os.path.exists(image_dir):
+        os.mkdir(image_dir)
+    if not os.path.exists(mask_dir):
+        os.mkdir(mask_dir)
+    for i in range(200):
         gen_data(random_RGB_color(),
                  random_lrud(),
                  random_sentence(),
@@ -86,4 +92,5 @@ if __name__ == '__main__':
                  random.randint(10, 80),
                  random_fonts(),
                  0,
-                 f'{i}.jpg')
+                 f'{i}.jpg',
+                 data_dir)
